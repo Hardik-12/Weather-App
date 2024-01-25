@@ -1,0 +1,39 @@
+.layout{
+  background-color: #364c73;
+  max-width: 400px;
+  height: 600px;
+  border-radius: 20px;
+  margin: auto;
+}
+
+
+.weather{
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  margin-top: 4rem;
+}
+
+
+.date-day{
+  display: flex;
+  font-size: 1.5rem;
+  margin-top: 2.4rem;
+}
+
+.time{
+  font-size: 2rem;
+}
+
+.city{
+  font-size: 1.5rem;
+}
+
+.temperature{
+  font-size: 4rem;
+}
+
+.utils{
+  padding: 1rem 1rem;
+}
