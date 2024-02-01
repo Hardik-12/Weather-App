@@ -1,26 +1,73 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 import React from "react";
 import IMAGES from "../assets/Images";
 
 
+export default function Weather(props){
+    const [weatherData, setWeatherData] = React.useState(null)
+    const [formData, setFormData] = React.useState({
+        search: ''
+    })
+    const [city, setCity] = React.useState('')
+    const [weatherIcon, setWeatherIcon] = React.useState(null)
 
 
-export default function Weather(){
+
+    React.useEffect(() => {
+        async function getWeatherDetails(){
+            var apiKey = 'a397fe9ce2762cce2b1b7a58324800c3'
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`)
+            
+            const data = await res.json()
+            console.log("Data", data)
+            if(res.ok){
+                setWeatherData(data)
+                var iconurl = "http://openweathermap.org/img/w/" + data.weather[0].icon + ".png";
+                setWeatherIcon(iconurl)
+            } 
+        }
+
+        city && getWeatherDetails()
+
+    }, [city])
+
+
+    function handleChange(event){
+        const {name, value} = event.target
+        setFormData(() => {
+            return {
+                ...formData,
+                [name]: value
+            }
+        })
+    }
+
+
+    function handleClick(){
+        setCity(formData.search)
+        
+    }
+
     return (
         <section className="weather">
-            <div className="date-day utils">
-                <p className="day">Thursday, &nbsp;</p>
-                <p className="date">25th Jan</p>
+            <div>
+                <input type="text" className="search" name='search' placeholder="Enter City Name" value={formData.search} onChange={handleChange} />
+                <button className="submit" onClick={handleClick}>
+                    <img src={IMAGES.tick} alt="image not available" className="tick-img" />
+                </button>
             </div>
 
-            <time className="time">3:13pm</time>
+            <div className="date-day utils">
+                <p className="day">{props.day()}, &nbsp;</p>
+                <p className="date">{props.date()}</p>
+            </div>
 
-            <p className="city utils">London</p>
+            <time className="time">{props.time()}</time>
 
-
-            <img src={IMAGES.cloudy} alt="" className="img-season" />
-
-            <p className="temperature utils">19°</p>
+            <p className="city utils">{city}</p>
+            <img src={weatherIcon} alt="" className="img-season" />
+            <p className="temperature utils">{weatherData && Math.floor(weatherData.main.temp) - 273}°</p>
         </section>
     )
 }
