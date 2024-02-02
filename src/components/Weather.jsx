@@ -9,28 +9,50 @@ export default function Weather(props){
     const [formData, setFormData] = React.useState({
         search: ''
     })
-    const [city, setCity] = React.useState('')
-    const [weatherIcon, setWeatherIcon] = React.useState(null)
-
-
-
+    const [cityInfo, setCityInfo] = React.useState({
+        name: '',
+        weatherIcon: '',
+        date: '',
+        time: '',
+        day: ''
+    })
+    
     React.useEffect(() => {
         async function getWeatherDetails(){
             var apiKey = 'a397fe9ce2762cce2b1b7a58324800c3'
-            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`)
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityInfo.name}&appid=${apiKey}`)
             
             const data = await res.json()
             console.log("Data", data)
             if(res.ok){
-                setWeatherData(data)
                 var iconurl = "http://openweathermap.org/img/w/" + data.weather[0].icon + ".png";
-                setWeatherIcon(iconurl)
+                const adjustedDateObject = new Date((data.dt * 1000) + (data.timezone * 1000))
+                const formattedTime = adjustedDateObject.toLocaleTimeString()
+
+                // -----------------------------------
+                const formattedDate = adjustedDateObject.toLocaleDateString()
+
+                // -----------------------------------
+                const dayOfWeek = adjustedDateObject.getDay()
+                const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                const dayName = daysOfWeek[dayOfWeek];
+                setWeatherData(data)
+                
+                setCityInfo(prevData => {
+                    return {
+                        ...prevData,
+                        weatherIcon: iconurl,
+                        time: formattedTime,
+                        day: dayName,
+                        date: formattedDate
+                    }
+                })
             } 
         }
 
-        city && getWeatherDetails()
+        cityInfo.name && getWeatherDetails()
 
-    }, [city])
+    }, [cityInfo.name])
 
 
     function handleChange(event){
@@ -45,8 +67,12 @@ export default function Weather(props){
 
 
     function handleClick(){
-        setCity(formData.search)
-        
+        setCityInfo(prevData => {
+            return {
+                ...prevData,
+                name: formData.search
+            }
+        })
     }
 
     return (
@@ -58,16 +84,23 @@ export default function Weather(props){
                 </button>
             </div>
 
-            <div className="date-day utils">
-                <p className="day">{props.day()}, &nbsp;</p>
-                <p className="date">{props.date()}</p>
-            </div>
+            {
+                weatherData && 
+                <>
+                    <div className="date-day utils">
+                        <p className="day">{cityInfo.day}, &nbsp;</p>
+                        <p className="date">{cityInfo.date}</p>
+                    </div>
+                    
+    
+                    <time className="time">{`${cityInfo.time}(GMT+-5:30)`}</time>
+    
+                    <p className="city utils">{cityInfo.name}</p>
+                    <img src={cityInfo.weatherIcon} alt="Enter city" className="img-season" />
+                    <p className="temperature utils">{Math.floor(weatherData.main.temp) - 273}°</p>
 
-            <time className="time">{props.time()}</time>
-
-            <p className="city utils">{city}</p>
-            <img src={weatherIcon} alt="" className="img-season" />
-            <p className="temperature utils">{weatherData && Math.floor(weatherData.main.temp) - 273}°</p>
+                </>
+            }
         </section>
     )
 }
